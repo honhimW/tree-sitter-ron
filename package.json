@@ -5,22 +5,31 @@
   "main": "bindings/node",
   "keywords": [
     "parser",
-    "ron"
+    "lexer",
+    "RON"
   ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/zee-editor/tree-sitter-ron.git"
-  },
   "author": "Marius Cobzarenco",
+  "contributors": [
+    "Amaan Qureshi <amaanq12@gmail.com>"
+  ],
   "license": "MIT",
-  "dependencies": {},
+  "bugs": {
+    "url": "https://github.com/amaanq/tree-sitter-ron/issues"
+  },
+  "dependencies": {
+    "nan": "^2.17.0"
+  },
   "devDependencies": {
+    "eslint": "^8.33.0",
+    "eslint-config-google": "^0.14.0",
     "tree-sitter-cli": "^0.20.0"
   },
+  "repository": "https://github.com/amaanq/tree-sitter-ron",
   "scripts": {
-    "tree-sitter": "tree-sitter",
-    "generate": "tree-sitter generate",
-    "test": "tree-sitter test"
+    "build": "tree-sitter generate && node-gyp build",
+    "test": "tree-sitter test && script/parse-examples",
+    "parse": "tree-sitter parse",
+    "test-windows": "tree-sitter test"
   },
   "tree-sitter": [
     {
@@ -28,6 +37,9 @@
       "injection-regex": "ron",
       "file-types": [
         "ron"
+      ],
+      "highlights": [
+        "queries/highlights.scm"
       ]
     }
   ]

@@ -1,4 +1,14 @@
-// Reference: https://github.com/ron-rs/ron/blob/master/docs/grammar.md
+/**
+ * @file Tree-sitter grammar definition
+ * @license MIT
+ * @see {@link https://github.com/ron-rs/ron/blob/master/docs/grammar.md|specification}
+ */
+
+/* eslint-disable arrow-parens */
+/* eslint-disable camelcase */
+/* eslint-disable-next-line spaced-comment */
+/// <reference types="tree-sitter-cli/dsl" />
+// @ts-check
 
 module.exports = grammar({
   name: 'ron',
@@ -22,19 +32,13 @@ module.exports = grammar({
     ),
 
     _value: $ => choice(
-      // compund types
       $.array,
       $.map,
       $.struct,
       $.tuple,
-      // literals
-      $.string,
-      $.char,
-      $.boolean,
-      $.integer,
-      $.float,
-      $.negative,
-      // enum variant
+
+      $._literal,
+
       $.enum_variant,
     ),
 
@@ -55,14 +59,13 @@ module.exports = grammar({
     ),
 
     struct: $ => choice(
-      $._unit_struct,
+      $.unit_struct,
       $._tuple_struct,
-      $._named_struct
+      $._named_struct,
     ),
 
-    _unit_struct: $ => choice(
-      // $.identifier,
-      '()'
+    unit_struct: _ => choice(
+      '()',
     ),
 
     struct_name: $ => $.identifier,
@@ -74,6 +77,10 @@ module.exports = grammar({
 
     _named_struct: $ => seq(
       optional($.struct_name),
+      field('body', $._struct_body),
+    ),
+
+    _struct_body: $ => seq(
       '(',
       sepBy(',', $.struct_entry),
       optional(','),
@@ -99,70 +106,98 @@ module.exports = grammar({
       $._value,
     ),
 
-    identifier: $ => /(r#)?[_\p{XID_Start}][_\p{XID_Continue}]*/,
+    _literal: $ => choice(
+      $.string,
+      $.char,
+      $.boolean,
+      $.integer,
+      $.float,
+      $.negative,
+    ),
 
-    negative: $ => seq('-', choice($.integer, $.float)),
-
-    integer: $ => token(seq(
+    integer: _ => token(seq(
       choice(
         /[0-9][0-9_]*/,
         /0x[0-9a-fA-F_]+/,
         /0b[01_]+/,
-        /0o[0-7_]+/
+        /0o[0-7_]+/,
       ),
     )),
+
+    negative: $ => seq('-', choice($.integer, $.float)),
 
     string: $ => seq(
       alias(/b?"/, '"'),
       repeat(choice(
-        $.escape_sequence,
-        $._string_content
+        $._escape_sequence,
+        $._string_content,
       )),
-      token.immediate('"')
+      token.immediate('"'),
     ),
 
-    char: $ => token(seq(
+    char: $ => seq(
       optional('b'),
       '\'',
       optional(choice(
-        seq('\\', choice(
-          /[^xu]/,
-          /u[0-9a-fA-F]{4}/,
-          /u{[0-9a-fA-F]+}/,
-          /x[0-9a-fA-F]{2}/
-        )),
-        /[^\\']/
+        $._escape_sequence,
+        /[^\\']/,
       )),
-      '\''
-    )),
+      '\'',
+    ),
 
-    escape_sequence: $ => token.immediate(
+    _escape_sequence: $ =>
+      choice(
+        prec(2, token.immediate(seq('\\', /[^abfnrtvxu'\"\\\?]/))),
+        prec(1, $.escape_sequence),
+      ),
+    escape_sequence: _ => token.immediate(
       seq('\\',
         choice(
           /[^xu]/,
+          /[0-7]{1,3}/,
           /u[0-9a-fA-F]{4}/,
           /u{[0-9a-fA-F]+}/,
-          /x[0-9a-fA-F]{2}/
-        )
+          /x[0-9a-fA-F]{2}/,
+        ),
       )),
 
-    boolean: $ => choice('true', 'false'),
+    boolean: _ => choice('true', 'false'),
+
+    identifier: _ => /(r#)?[_\p{XID_Start}][_\p{XID_Continue}]*/,
 
     comment: $ => choice(
       $.line_comment,
-      $.block_comment
+      $.block_comment,
     ),
 
-    line_comment: $ => token(seq(
-      '//', /.*/
+    line_comment: _ => token(seq(
+      '//', /.*/,
     )),
-  }
+  },
 });
 
+/**
+ * Creates a rule to match one or more of the rules separated by the separator.
+ *
+ * @param {string|RegExp} sep - The separator to use.
+ * @param {Rule|RegExp} rule
+ *
+ * @return {SeqRule}
+ *
+ */
 function sepBy1(sep, rule) {
-  return seq(rule, repeat(seq(sep, rule)))
+  return seq(rule, repeat(seq(sep, rule)));
 }
 
+/**
+ * Creates a rule to optionally match one or more of the rules separated by the separator.
+ *
+ * @param {string|RegExp} sep - The separator to use.
+ * @param {Rule|RegExp} rule
+ *
+ * @return {ChoiceRule}
+ *
+ */
 function sepBy(sep, rule) {
-  return optional(sepBy1(sep, rule))
+  return optional(sepBy1(sep, rule));
 }
