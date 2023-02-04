@@ -1,5 +1,5 @@
 /**
- * @file Tree-sitter grammar definition
+ * @file RON grammar for tree-sitter
  * @license MIT
  * @see {@link https://github.com/ron-rs/ron/blob/master/docs/grammar.md|specification}
  */
