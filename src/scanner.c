@@ -11,19 +11,18 @@ enum TokenType {
 void *tree_sitter_ron_external_scanner_create() { return NULL; }
 void tree_sitter_ron_external_scanner_destroy(void *p) {}
 void tree_sitter_ron_external_scanner_reset(void *p) {}
-unsigned tree_sitter_ron_external_scanner_serialize(void *p, char *buffer) { return 0; }
-void tree_sitter_ron_external_scanner_deserialize(void *p, const char *b, unsigned n) {}
-
-static void advance(TSLexer *lexer) {
-  lexer->advance(lexer, false);
+unsigned tree_sitter_ron_external_scanner_serialize(void *p, char *buffer) {
+  return 0;
 }
+void tree_sitter_ron_external_scanner_deserialize(void *p, const char *b,
+                                                  unsigned n) {}
 
-static bool is_num_char(int32_t c) {
-  return c == '_' || iswdigit(c);
-}
+static void advance(TSLexer *lexer) { lexer->advance(lexer, false); }
+
+static bool is_num_char(int32_t c) { return c == '_' || iswdigit(c); }
 
 bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
-                                            const bool *valid_symbols) {
+                                           const bool *valid_symbols) {
   if (valid_symbols[STRING_CONTENT] && !valid_symbols[FLOAT]) {
     bool has_content = false;
     for (;;) {
@@ -39,15 +38,16 @@ bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
     return has_content;
   }
 
-  while (iswspace(lexer->lookahead)) lexer->advance(lexer, true);
+  while (iswspace(lexer->lookahead))
+    lexer->advance(lexer, true);
 
-  if (
-    valid_symbols[RAW_STRING] &&
-    (lexer->lookahead == 'r' || lexer->lookahead == 'b')
-  ) {
+  if (valid_symbols[RAW_STRING] &&
+      (lexer->lookahead == 'r' || lexer->lookahead == 'b')) {
     lexer->result_symbol = RAW_STRING;
-    if (lexer->lookahead == 'b') advance(lexer);
-    if (lexer->lookahead != 'r') return false;
+    if (lexer->lookahead == 'b')
+      advance(lexer);
+    if (lexer->lookahead != 'r')
+      return false;
     advance(lexer);
 
     unsigned opening_hash_count = 0;
@@ -56,7 +56,8 @@ bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
       opening_hash_count++;
     }
 
-    if (lexer->lookahead != '"') return false;
+    if (lexer->lookahead != '"')
+      return false;
     advance(lexer);
 
     for (;;) {
@@ -92,8 +93,9 @@ bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
       has_fraction = true;
       advance(lexer);
       if (iswalpha(lexer->lookahead)) {
-          // The dot is followed by a letter: 1.max(2) => not a float but an integer
-          return false;
+        // The dot is followed by a letter: 1.max(2) => not a float but an
+        // integer
+        return false;
       }
 
       if (lexer->lookahead == '.') {
@@ -123,9 +125,11 @@ bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
       lexer->mark_end(lexer);
     }
 
-    if (!has_exponent && !has_fraction) return false;
+    if (!has_exponent && !has_fraction)
+      return false;
 
-    if (lexer->lookahead != 'u' && lexer->lookahead != 'i' && lexer->lookahead != 'f') {
+    if (lexer->lookahead != 'u' && lexer->lookahead != 'i' &&
+        lexer->lookahead != 'f') {
       return true;
     }
     advance(lexer);
@@ -143,41 +147,42 @@ bool tree_sitter_ron_external_scanner_scan(void *payload, TSLexer *lexer,
 
   if (lexer->lookahead == '/') {
     advance(lexer);
-    if (lexer->lookahead != '*') return false;
+    if (lexer->lookahead != '*')
+      return false;
     advance(lexer);
 
     bool after_star = false;
     unsigned nesting_depth = 1;
     for (;;) {
       switch (lexer->lookahead) {
-        case '\0':
-          return false;
-        case '*':
-          advance(lexer);
-          after_star = true;
-          break;
-        case '/':
-          if (after_star) {
-            advance(lexer);
-            after_star = false;
-            nesting_depth--;
-            if (nesting_depth == 0) {
-              lexer->result_symbol = BLOCK_COMMENT;
-              return true;
-            }
-          } else {
-            advance(lexer);
-            after_star = false;
-            if (lexer->lookahead == '*') {
-              nesting_depth++;
-              advance(lexer);
-            }
-          }
-          break;
-        default:
+      case '\0':
+        return false;
+      case '*':
+        advance(lexer);
+        after_star = true;
+        break;
+      case '/':
+        if (after_star) {
           advance(lexer);
           after_star = false;
-          break;
+          nesting_depth--;
+          if (nesting_depth == 0) {
+            lexer->result_symbol = BLOCK_COMMENT;
+            return true;
+          }
+        } else {
+          advance(lexer);
+          after_star = false;
+          if (lexer->lookahead == '*') {
+            nesting_depth++;
+            advance(lexer);
+          }
+        }
+        break;
+      default:
+        advance(lexer);
+        after_star = false;
+        break;
       }
     }
   }

@@ -60,6 +60,21 @@
     "fields": {}
   },
   {
+    "type": "char",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "escape_sequence",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "enum_variant",
     "named": true,
     "fields": {},
@@ -236,21 +251,44 @@
   {
     "type": "struct",
     "named": true,
-    "fields": {},
+    "fields": {
+      "body": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "(",
+            "named": false
+          },
+          {
+            "type": ")",
+            "named": false
+          },
+          {
+            "type": ",",
+            "named": false
+          },
+          {
+            "type": "struct_entry",
+            "named": true
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
       "required": false,
       "types": [
-        {
-          "type": "struct_entry",
-          "named": true
-        },
         {
           "type": "struct_name",
           "named": true
         },
         {
           "type": "tuple",
+          "named": true
+        },
+        {
+          "type": "unit_struct",
           "named": true
         }
       ]
@@ -386,7 +424,16 @@
     }
   },
   {
+    "type": "unit_struct",
+    "named": true,
+    "fields": {}
+  },
+  {
     "type": "\"",
+    "named": false
+  },
+  {
+    "type": "'",
     "named": false
   },
   {
@@ -422,11 +469,11 @@
     "named": false
   },
   {
-    "type": "block_comment",
-    "named": true
+    "type": "b",
+    "named": false
   },
   {
-    "type": "char",
+    "type": "block_comment",
     "named": true
   },
   {
