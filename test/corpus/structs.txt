@@ -6,7 +6,8 @@ Empty () is a struct
 --------------------------------------------------------------------------------
 
 (source_file
-  (struct))
+  (struct
+    (unit_struct)))
 
 
 ================================================================================
@@ -73,7 +74,8 @@ Anonymous struct with mixed types and comments
       (identifier)
       (array
         (char)
-        (char)))
+        (char
+          (escape_sequence))))
     (struct_entry
       (identifier)
       (integer))

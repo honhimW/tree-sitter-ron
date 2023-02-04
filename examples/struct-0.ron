@@ -1,7 +1,7 @@
 (
     // some fields
-    some_escaped_string: "abc\"\n",
-    chars: ['e', '\n'],
+    some_escaped_string: "abc\"\n\A\b\\",
+    chars: ['e', '\a'],
     integer: 1,
     hex_integer: 0xFF,
     binary_integer: 0b0110,

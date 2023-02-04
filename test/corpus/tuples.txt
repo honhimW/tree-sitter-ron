@@ -38,7 +38,8 @@ Tuple with mixed types and comments
       (escape_sequence))
     (array
       (char)
-      (char))
+      (char
+        (escape_sequence)))
     (integer)
     (integer)
     (block_comment)
