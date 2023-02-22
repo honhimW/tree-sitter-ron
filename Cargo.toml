@@ -1,14 +1,18 @@
 [package]
 name = "tree-sitter-ron"
-description = "RON grammar for tree-sitter"
-version = "0.1.0"
-authors = ["Marius Cobzarenco", "Amaan Qureshi <amaanq12@gmail.com>"]
+description = "Rusty Object Notation (RON) grammar for tree-sitter"
+version = "0.2.0"
+authors = [
+	"Amaan Qureshi <amaanq12@gmail.com>",
+	"Marius Cobzarenco <marius@reinfer.io>",
+]
+license = "MIT"
 readme = "bindings/rust/README.md"
 keywords = ["incremental", "parsing", "ron"]
 categories = ["parsing", "text-editors"]
 repository = "https://github.com/amaanq/tree-sitter-ron"
 edition = "2021"
-license = "MIT"
+autoexamples = false
 
 build = "bindings/rust/build.rs"
 include = ["bindings/rust/*", "grammar.js", "queries/*", "src/*"]
