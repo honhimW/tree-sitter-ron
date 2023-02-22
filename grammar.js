@@ -1,5 +1,7 @@
 /**
  * @file RON grammar for tree-sitter
+ * @author Marius Cobzarenco <marius@reinfer.io>
+ * @author Amaan Qureshi <amaanq12@gmail.com>
  * @license MIT
  * @see {@link https://github.com/ron-rs/ron/blob/master/docs/grammar.md|specification}
  */
