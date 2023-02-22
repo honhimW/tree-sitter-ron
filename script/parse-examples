@@ -25,7 +25,7 @@ function clone_repo {
 	popd >/dev/null
 }
 
-checkout ron-rs ron 55ba26feb7ab279002263227c712e9e3fb51eede
+clone_repo ron-rs ron 55ba26feb7ab279002263227c712e9e3fb51eede
 
 known_failures="$(cat script/known_failures.txt)"
 
