@@ -1,35 +1,44 @@
 #!/usr/bin/env bash
 
-set -e
+set -eu
 
 cd "$(dirname "$0")/.."
 
-function checkout() {
-  repo=$1; url=$2; sha=$3
+function clone_repo {
+	owner=$1
+	name=$2
+	sha=$3
 
-  if [ ! -d "$repo" ]; then
-    git clone "https://github.com/$url" "$repo"
-  fi
+	path=examples/$name
+	if [ ! -d "$path" ]; then
+		echo "Cloning $owner/$name"
+		git clone "https://github.com/$owner/$name" "$path"
+	fi
 
-  pushd "$repo"
-  git fetch && git reset --hard "$sha"
-  popd
+	pushd "$path" >/dev/null
+	actual_sha=$(git rev-parse HEAD)
+	if [ "$actual_sha" != "$sha" ]; then
+		echo "Updating $owner/$name to $sha"
+		git fetch
+		git reset --hard "$sha"
+	fi
+	popd >/dev/null
 }
 
-checkout examples/ron ron-rs/ron 55ba26feb7ab279002263227c712e9e3fb51eede
+checkout ron-rs ron 55ba26feb7ab279002263227c712e9e3fb51eede
 
 known_failures="$(cat script/known_failures.txt)"
 
 # shellcheck disable=2046
 tree-sitter parse -q \
-	'examples/**/*.ron' \
+	"examples/**/*.ron" \
 	$(for file in $known_failures; do echo "!${file}"; done)
 
-example_count=$(find examples -name '*.ron' | wc -l)
-failure_count=$(wc -w <<< "$known_failures")
-success_count=$(( example_count - failure_count ))
-success_percent=$(bc -l <<< "100*${success_count}/${example_count}")
+example_count=$(find examples -name "*.ron" | wc -l)
+failure_count=$(wc -w <<<"$known_failures")
+success_count=$((example_count - failure_count))
+success_percent=$(bc -l <<<"100*${success_count}/${example_count}")
 
 printf \
-  "Successfully parsed %d of %d example files (%.1f%%)\n" \
-  $success_count "$example_count" "$success_percent"
+	"Successfully parsed %d of %d example files (%.1f%%)\n" \
+	$success_count "$example_count" "$success_percent"
